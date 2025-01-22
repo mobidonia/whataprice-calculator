@@ -138,7 +138,12 @@ const Calculator = () => {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+                  <Tooltip formatter={(value: number | string) => {
+                    if (typeof value === 'number') {
+                      return `$${value.toFixed(2)}`;
+                    }
+                    return value;
+                  }} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
