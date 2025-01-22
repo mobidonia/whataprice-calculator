@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, Printer } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { useToast } from "@/hooks/use-toast";
 
 interface CostData {
   country: string;
@@ -24,15 +25,91 @@ interface CostBreakdownProps {
 }
 
 const CostBreakdown = ({ costs, onRemoveCountry, showRemoveButton, freeEntryPoint }: CostBreakdownProps) => {
+  const { toast } = useToast();
+  
   const pieData = costs.byCountry.map(countryData => ({
     name: countryData.country,
     value: countryData.total,
     color: `hsl(${Math.random() * 360}, 70%, 50%)`
   }));
 
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast({
+        title: "Error",
+        description: "Please allow pop-ups to print the cost breakdown",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const content = `
+      <html>
+        <head>
+          <title>WhatsApp Business API Monthly Cost Breakdown</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .cost-item { margin: 10px 0; }
+            .total { margin-top: 20px; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>WhatsApp Business API Monthly Cost Breakdown</h1>
+            <p>Generated on ${new Date().toLocaleDateString()}</p>
+          </div>
+          ${costs.byCountry.map(countryData => `
+            <div class="cost-item">
+              <h2>${countryData.country}</h2>
+              <p>Marketing: $${countryData.marketing.toFixed(2)}</p>
+              <p>Utility: $${countryData.utility.toFixed(2)}</p>
+              <p>Authentication: $${countryData.authentication.toFixed(2)}</p>
+              <p>Service: Free</p>
+              ${freeEntryPoint ? 
+                `<p style="color: green;">Free Entry Point Savings: -$${countryData.savings.toFixed(2)}</p>` 
+                : ''}
+              <p><strong>Subtotal: $${countryData.total.toFixed(2)}</strong></p>
+            </div>
+          `).join('')}
+          <div class="total">
+            <p>Total Monthly Cost: $${costs.total.toFixed(2)}</p>
+            ${freeEntryPoint ? 
+              `<p style="color: green;">Total Savings: -$${costs.totalSavings.toFixed(2)}</p>`
+              : ''}
+          </div>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(content);
+    printWindow.document.close();
+    
+    // Wait for content to load before printing
+    printWindow.onload = () => {
+      printWindow.print();
+      toast({
+        title: "Success",
+        description: "Print window opened",
+      });
+    };
+  };
+
   return (
     <div>
-      <h3 className="text-xl font-semibold mb-4">Monthly Cost Breakdown</h3>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-xl font-semibold">Monthly Cost Breakdown</h3>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handlePrint}
+          className="flex items-center gap-2"
+        >
+          <Printer className="h-4 w-4" />
+          Print
+        </Button>
+      </div>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
