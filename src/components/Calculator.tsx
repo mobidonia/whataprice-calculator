@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { pricingData } from "@/data/whatsappPricing";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import CountrySelect from "./CountrySelect";
 
 const Calculator = () => {
   const [selectedCountry, setSelectedCountry] = useState(pricingData[0]);
@@ -59,26 +59,13 @@ const Calculator = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <Card className="glass-card p-6 space-y-6">
-            <div className="space-y-4">
-              <label className="block text-sm font-medium">Select Country</label>
-              <Select
-                value={selectedCountry.market}
-                onValueChange={(value) => 
-                  setSelectedCountry(pricingData.find(p => p.market === value) || pricingData[0])
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {pricingData.map((country) => (
-                    <SelectItem key={country.market} value={country.market}>
-                      {country.market}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <CountrySelect
+              value={selectedCountry.market}
+              onValueChange={(value) => 
+                setSelectedCountry(pricingData.find(p => p.market === value) || pricingData[0])
+              }
+              data={pricingData}
+            />
 
             <div className="space-y-4">
               <label className="block text-sm font-medium">Messages per Day</label>
