@@ -126,6 +126,17 @@ const Calculator = () => {
           <p className="text-lg text-muted-foreground">
             Estimate your messaging costs across different regions and message types
           </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Pricing data is sourced from the{" "}
+            <a 
+              href="https://developers.facebook.com/docs/whatsapp/pricing#free-entry-point-conversations" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="underline hover:text-primary transition-colors"
+            >
+              official WhatsApp Business API pricing documentation
+            </a>
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
