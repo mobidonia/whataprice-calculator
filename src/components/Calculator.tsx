@@ -24,6 +24,38 @@ const Calculator = () => {
   const [servicePercentage, setServicePercentage] = useState(20);
   const [freeEntryPoint, setFreeEntryPoint] = useState(false);
 
+  const updatePercentage = (type: 'marketing' | 'utility' | 'authentication' | 'service', newValue: number) => {
+    const getOtherPercentages = (excludeType: string) => {
+      const percentages = {
+        marketing: marketingPercentage,
+        utility: utilityPercentage,
+        authentication: authenticationPercentage,
+        service: servicePercentage
+      };
+      delete percentages[excludeType as keyof typeof percentages];
+      return Object.values(percentages);
+    };
+
+    const otherPercentagesSum = getOtherPercentages(type).reduce((sum, value) => sum + value, 0);
+    const maxAllowed = 100 - otherPercentagesSum;
+    const clampedValue = Math.min(newValue, maxAllowed);
+
+    switch (type) {
+      case 'marketing':
+        setMarketingPercentage(clampedValue);
+        break;
+      case 'utility':
+        setUtilityPercentage(clampedValue);
+        break;
+      case 'authentication':
+        setAuthenticationPercentage(clampedValue);
+        break;
+      case 'service':
+        setServicePercentage(clampedValue);
+        break;
+    }
+  };
+
   const calculateMonthlyCost = () => {
     const costs = selectedCountries.map(({ country, messagesPerDay }) => {
       const monthlyMessages = messagesPerDay * 30;
@@ -89,6 +121,7 @@ const Calculator = () => {
   }));
 
   const totalDailyMessages = selectedCountries.reduce((acc, curr) => acc + curr.messagesPerDay, 0);
+  const totalPercentage = marketingPercentage + utilityPercentage + authenticationPercentage + servicePercentage;
 
   return (
     <div className="min-h-screen p-8">
@@ -144,13 +177,18 @@ const Calculator = () => {
             </div>
 
             <div className="space-y-4">
-              <label className="block text-sm font-medium">Message Type Distribution</label>
+              <div className="flex justify-between items-center">
+                <label className="block text-sm font-medium">Message Type Distribution</label>
+                <span className={`text-sm ${totalPercentage > 100 ? 'text-red-500' : 'text-muted-foreground'}`}>
+                  Total: {totalPercentage}%
+                </span>
+              </div>
               <div className="space-y-2">
                 <div>
                   <span className="text-sm">Marketing ({marketingPercentage}%)</span>
                   <Slider
                     value={[marketingPercentage]}
-                    onValueChange={(value) => setMarketingPercentage(value[0])}
+                    onValueChange={(value) => updatePercentage('marketing', value[0])}
                     min={0}
                     max={100}
                     step={1}
@@ -161,7 +199,7 @@ const Calculator = () => {
                   <span className="text-sm">Utility ({utilityPercentage}%)</span>
                   <Slider
                     value={[utilityPercentage]}
-                    onValueChange={(value) => setUtilityPercentage(value[0])}
+                    onValueChange={(value) => updatePercentage('utility', value[0])}
                     min={0}
                     max={100}
                     step={1}
@@ -172,7 +210,7 @@ const Calculator = () => {
                   <span className="text-sm">Authentication ({authenticationPercentage}%)</span>
                   <Slider
                     value={[authenticationPercentage]}
-                    onValueChange={(value) => setAuthenticationPercentage(value[0])}
+                    onValueChange={(value) => updatePercentage('authentication', value[0])}
                     min={0}
                     max={100}
                     step={1}
@@ -183,7 +221,7 @@ const Calculator = () => {
                   <span className="text-sm">Service ({servicePercentage}%) - Free</span>
                   <Slider
                     value={[servicePercentage]}
-                    onValueChange={(value) => setServicePercentage(value[0])}
+                    onValueChange={(value) => updatePercentage('service', value[0])}
                     min={0}
                     max={100}
                     step={1}
