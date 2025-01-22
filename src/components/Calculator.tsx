@@ -9,9 +9,15 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recha
 import CountrySelect from "./CountrySelect";
 import { countryFlags } from "@/constants/countryFlags";
 
+interface CountryVolume {
+  country: PricingData;
+  messagesPerDay: number;
+}
+
 const Calculator = () => {
-  const [selectedCountries, setSelectedCountries] = useState([pricingData[0]]);
-  const [messagesPerDay, setMessagesPerDay] = useState(100);
+  const [selectedCountries, setSelectedCountries] = useState<CountryVolume[]>([
+    { country: pricingData[0], messagesPerDay: 100 }
+  ]);
   const [marketingPercentage, setMarketingPercentage] = useState(25);
   const [utilityPercentage, setUtilityPercentage] = useState(30);
   const [authenticationPercentage, setAuthenticationPercentage] = useState(25);
@@ -19,14 +25,13 @@ const Calculator = () => {
   const [freeEntryPoint, setFreeEntryPoint] = useState(false);
 
   const calculateMonthlyCost = () => {
-    const monthlyMessages = messagesPerDay * 30;
-    const messagesPerCountry = monthlyMessages / selectedCountries.length;
-    
-    const costs = selectedCountries.map(country => {
-      const marketingMessages = (messagesPerCountry * marketingPercentage) / 100;
-      const utilityMessages = (messagesPerCountry * utilityPercentage) / 100;
-      const authMessages = (messagesPerCountry * authenticationPercentage) / 100;
-      const serviceMessages = (messagesPerCountry * servicePercentage) / 100;
+    const costs = selectedCountries.map(({ country, messagesPerDay }) => {
+      const monthlyMessages = messagesPerDay * 30;
+      
+      const marketingMessages = (monthlyMessages * marketingPercentage) / 100;
+      const utilityMessages = (monthlyMessages * utilityPercentage) / 100;
+      const authMessages = (monthlyMessages * authenticationPercentage) / 100;
+      const serviceMessages = (monthlyMessages * servicePercentage) / 100;
 
       const freeEntryPointDiscount = freeEntryPoint ? 0.2 : 0;
       
@@ -59,15 +64,21 @@ const Calculator = () => {
 
   const handleCountryAdd = (value: string) => {
     const country = pricingData.find(p => p.market === value);
-    if (country && !selectedCountries.some(sc => sc.market === country.market)) {
-      setSelectedCountries([...selectedCountries, country]);
+    if (country && !selectedCountries.some(sc => sc.country.market === country.market)) {
+      setSelectedCountries([...selectedCountries, { country, messagesPerDay: 100 }]);
     }
   };
 
   const handleCountryRemove = (market: string) => {
     if (selectedCountries.length > 1) {
-      setSelectedCountries(selectedCountries.filter(c => c.market !== market));
+      setSelectedCountries(selectedCountries.filter(c => c.country.market !== market));
     }
+  };
+
+  const updateCountryVolume = (market: string, volume: number) => {
+    setSelectedCountries(selectedCountries.map(cv => 
+      cv.country.market === market ? { ...cv, messagesPerDay: volume } : cv
+    ));
   };
 
   const costs = calculateMonthlyCost();
@@ -76,6 +87,8 @@ const Calculator = () => {
     value: countryData.total,
     color: `hsl(${Math.random() * 360}, 70%, 50%)`
   }));
+
+  const totalDailyMessages = selectedCountries.reduce((acc, curr) => acc + curr.messagesPerDay, 0);
 
   return (
     <div className="min-h-screen p-8">
@@ -87,23 +100,35 @@ const Calculator = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <Card className="glass-card p-6 space-y-6">
             <CountrySelect
-              selectedCountries={selectedCountries}
+              selectedCountries={selectedCountries.map(cv => cv.country)}
               onValueChange={handleCountryAdd}
               data={pricingData}
             />
 
             <div className="space-y-4">
-              <label className="block text-sm font-medium">Messages per Day (Total)</label>
-              <Slider
-                value={[messagesPerDay]}
-                onValueChange={(value) => setMessagesPerDay(value[0])}
-                min={1}
-                max={1000}
-                step={1}
-                className="slider-track"
-              />
+              <label className="block text-sm font-medium">Messages per Day (Per Country)</label>
+              {selectedCountries.map(({ country, messagesPerDay }) => (
+                <div key={country.market} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">
+                      {countryFlags[country.market] || "🌐"} {country.market}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      {messagesPerDay} messages
+                    </span>
+                  </div>
+                  <Slider
+                    value={[messagesPerDay]}
+                    onValueChange={(value) => updateCountryVolume(country.market, value[0])}
+                    min={1}
+                    max={1000}
+                    step={1}
+                    className="slider-track"
+                  />
+                </div>
+              ))}
               <p className="text-sm text-muted-foreground text-right">
-                {messagesPerDay} messages ({Math.round(messagesPerDay / selectedCountries.length)} per country)
+                Total: {totalDailyMessages} messages per day
               </p>
             </div>
 
