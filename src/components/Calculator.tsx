@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import { pricingData, PricingData } from "@/data/whatsappPricing";
 import CountrySelect from "./CountrySelect";
 import MessageTypeDistribution from "./MessageTypeDistribution";
@@ -114,6 +115,13 @@ const Calculator = () => {
     ));
   };
 
+  const handleManualInput = (market: string, value: string) => {
+    const numValue = parseInt(value.replace(/,/g, ''), 10) || 0;
+    const maxValue = isMonthlyVolume ? 3000000 : 100000;
+    const clampedValue = Math.min(Math.max(numValue, 1), maxValue);
+    updateCountryVolume(market, clampedValue);
+  };
+
   const costs = calculateMonthlyCost();
   const totalMessages = selectedCountries.reduce((acc, curr) => acc + curr.messagesPerDay, 0);
   const displayedTotalMessages = isMonthlyVolume ? totalMessages : (totalMessages * 30);
@@ -169,9 +177,17 @@ const Calculator = () => {
                     <span className="text-sm">
                       {countryFlags[country.market] || "🌐"} {country.market}
                     </span>
-                    <span className="text-sm text-muted-foreground">
-                      {messagesPerDay.toLocaleString()} messages {isMonthlyVolume ? 'per month' : 'per day'}
-                    </span>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        type="text"
+                        value={messagesPerDay.toLocaleString()}
+                        onChange={(e) => handleManualInput(country.market, e.target.value)}
+                        className="w-32 text-right text-sm"
+                      />
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">
+                        messages {isMonthlyVolume ? 'per month' : 'per day'}
+                      </span>
+                    </div>
                   </div>
                   <Slider
                     value={[messagesPerDay]}
