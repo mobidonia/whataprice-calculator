@@ -1,5 +1,6 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PricingData } from "@/data/whatsappPricing";
+import { countryFlags } from "@/constants/countryFlags";
 
 // Map of country/region names to their corresponding flag emojis
 const countryFlags: { [key: string]: string } = {

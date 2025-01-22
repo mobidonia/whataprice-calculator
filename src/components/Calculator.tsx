@@ -7,6 +7,7 @@ import { X } from "lucide-react";
 import { pricingData } from "@/data/whatsappPricing";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import CountrySelect from "./CountrySelect";
+import { countryFlags } from "@/constants/countryFlags";
 
 const Calculator = () => {
   const [selectedCountries, setSelectedCountries] = useState([pricingData[0]]);
