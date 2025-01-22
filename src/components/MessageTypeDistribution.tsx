@@ -71,6 +71,22 @@ const MessageTypeDistribution = ({
           />
         </div>
       </div>
+      
+      {/* Ad Banner */}
+      <div className="mt-8">
+        <a 
+          href="https://whatsbox.mobidonia.com/" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="block transition-opacity hover:opacity-90"
+        >
+          <img 
+            src="https://mobidonia-demo.imgix.net/img/WhatsBox.jpg" 
+            alt="WhatsBox - WhatsApp Business Solution"
+            className="w-full rounded-lg shadow-lg"
+          />
+        </a>
+      </div>
     </div>
   );
 };
