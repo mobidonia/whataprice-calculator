@@ -2,12 +2,14 @@ import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
 import { pricingData } from "@/data/whatsappPricing";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import CountrySelect from "./CountrySelect";
 
 const Calculator = () => {
-  const [selectedCountry, setSelectedCountry] = useState(pricingData[0]);
+  const [selectedCountries, setSelectedCountries] = useState([pricingData[0]]);
   const [messagesPerDay, setMessagesPerDay] = useState(100);
   const [marketingPercentage, setMarketingPercentage] = useState(25);
   const [utilityPercentage, setUtilityPercentage] = useState(30);
@@ -17,38 +19,62 @@ const Calculator = () => {
 
   const calculateMonthlyCost = () => {
     const monthlyMessages = messagesPerDay * 30;
-    const marketingMessages = (monthlyMessages * marketingPercentage) / 100;
-    const utilityMessages = (monthlyMessages * utilityPercentage) / 100;
-    const authMessages = (monthlyMessages * authenticationPercentage) / 100;
-    const serviceMessages = (monthlyMessages * servicePercentage) / 100;
-
-    // If free entry point is enabled, we assume 20% of conversations are free
-    const freeEntryPointDiscount = freeEntryPoint ? 0.2 : 0;
+    const messagesPerCountry = monthlyMessages / selectedCountries.length;
     
-    const marketingCost = marketingMessages * selectedCountry.marketing * (1 - freeEntryPointDiscount);
-    const utilityCost = utilityMessages * selectedCountry.utility * (1 - freeEntryPointDiscount);
-    const authCost = authMessages * selectedCountry.authentication * (1 - freeEntryPointDiscount);
-    const serviceCost = 0; // Service messages are free
+    const costs = selectedCountries.map(country => {
+      const marketingMessages = (messagesPerCountry * marketingPercentage) / 100;
+      const utilityMessages = (messagesPerCountry * utilityPercentage) / 100;
+      const authMessages = (messagesPerCountry * authenticationPercentage) / 100;
+      const serviceMessages = (messagesPerCountry * servicePercentage) / 100;
+
+      const freeEntryPointDiscount = freeEntryPoint ? 0.2 : 0;
+      
+      const marketingCost = marketingMessages * country.marketing * (1 - freeEntryPointDiscount);
+      const utilityCost = utilityMessages * country.utility * (1 - freeEntryPointDiscount);
+      const authCost = authMessages * country.authentication * (1 - freeEntryPointDiscount);
+      const serviceCost = 0; // Service messages are free
+
+      return {
+        country: country.market,
+        marketing: marketingCost,
+        utility: utilityCost,
+        authentication: authCost,
+        service: serviceCost,
+        total: marketingCost + utilityCost + authCost + serviceCost,
+        savings: freeEntryPointDiscount * (
+          marketingMessages * country.marketing + 
+          utilityMessages * country.utility + 
+          authMessages * country.authentication
+        )
+      };
+    });
 
     return {
-      marketing: marketingCost,
-      utility: utilityCost,
-      authentication: authCost,
-      service: serviceCost,
-      total: marketingCost + utilityCost + authCost + serviceCost,
-      savings: freeEntryPointDiscount * (marketingMessages * selectedCountry.marketing + 
-              utilityMessages * selectedCountry.utility + 
-              authMessages * selectedCountry.authentication)
+      byCountry: costs,
+      total: costs.reduce((acc, curr) => acc + curr.total, 0),
+      totalSavings: costs.reduce((acc, curr) => acc + curr.savings, 0)
     };
   };
 
+  const handleCountryAdd = (value: string) => {
+    const country = pricingData.find(p => p.market === value);
+    if (country && !selectedCountries.some(sc => sc.market === country.market)) {
+      setSelectedCountries([...selectedCountries, country]);
+    }
+  };
+
+  const handleCountryRemove = (market: string) => {
+    if (selectedCountries.length > 1) {
+      setSelectedCountries(selectedCountries.filter(c => c.market !== market));
+    }
+  };
+
   const costs = calculateMonthlyCost();
-  const pieData = [
-    { name: "Marketing", value: costs.marketing, color: "#8B5CF6" },
-    { name: "Utility", value: costs.utility, color: "#EC4899" },
-    { name: "Authentication", value: costs.authentication, color: "#3B82F6" },
-    { name: "Service (Free)", value: 0, color: "#10B981" }
-  ];
+  const pieData = costs.byCountry.map(countryData => ({
+    name: countryData.country,
+    value: countryData.total,
+    color: `hsl(${Math.random() * 360}, 70%, 50%)`
+  }));
 
   return (
     <div className="min-h-screen p-8">
@@ -60,15 +86,13 @@ const Calculator = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <Card className="glass-card p-6 space-y-6">
             <CountrySelect
-              value={selectedCountry.market}
-              onValueChange={(value) => 
-                setSelectedCountry(pricingData.find(p => p.market === value) || pricingData[0])
-              }
+              selectedCountries={selectedCountries}
+              onValueChange={handleCountryAdd}
               data={pricingData}
             />
 
             <div className="space-y-4">
-              <label className="block text-sm font-medium">Messages per Day</label>
+              <label className="block text-sm font-medium">Messages per Day (Total)</label>
               <Slider
                 value={[messagesPerDay]}
                 onValueChange={(value) => setMessagesPerDay(value[0])}
@@ -77,7 +101,9 @@ const Calculator = () => {
                 step={1}
                 className="slider-track"
               />
-              <p className="text-sm text-muted-foreground text-right">{messagesPerDay} messages</p>
+              <p className="text-sm text-muted-foreground text-right">
+                {messagesPerDay} messages ({Math.round(messagesPerDay / selectedCountries.length)} per country)
+              </p>
             </div>
 
             <div className="flex items-center space-x-2 py-4">
@@ -170,34 +196,63 @@ const Calculator = () => {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="space-y-2 mt-4">
-              <p className="flex justify-between">
-                <span>Marketing:</span>
-                <span>${costs.marketing.toFixed(2)}</span>
-              </p>
-              <p className="flex justify-between">
-                <span>Utility:</span>
-                <span>${costs.utility.toFixed(2)}</span>
-              </p>
-              <p className="flex justify-between">
-                <span>Authentication:</span>
-                <span>${costs.authentication.toFixed(2)}</span>
-              </p>
-              <p className="flex justify-between">
-                <span>Service:</span>
-                <span className="text-green-400">Free</span>
-              </p>
-              {freeEntryPoint && (
-                <p className="flex justify-between text-green-400">
-                  <span>Free Entry Point Savings:</span>
-                  <span>-${costs.savings.toFixed(2)}</span>
-                </p>
-              )}
+            <div className="space-y-4 mt-4">
+              {costs.byCountry.map((countryData) => (
+                <div key={countryData.country} className="space-y-2 border-b border-white/10 pb-4">
+                  <div className="flex justify-between items-center">
+                    <h4 className="font-medium flex items-center gap-2">
+                      <span className="text-xl">{countryFlags[countryData.country] || "🌐"}</span>
+                      {countryData.country}
+                    </h4>
+                    {selectedCountries.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleCountryRemove(countryData.country)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                  <p className="flex justify-between">
+                    <span>Marketing:</span>
+                    <span>${countryData.marketing.toFixed(2)}</span>
+                  </p>
+                  <p className="flex justify-between">
+                    <span>Utility:</span>
+                    <span>${countryData.utility.toFixed(2)}</span>
+                  </p>
+                  <p className="flex justify-between">
+                    <span>Authentication:</span>
+                    <span>${countryData.authentication.toFixed(2)}</span>
+                  </p>
+                  <p className="flex justify-between">
+                    <span>Service:</span>
+                    <span className="text-green-400">Free</span>
+                  </p>
+                  {freeEntryPoint && (
+                    <p className="flex justify-between text-green-400">
+                      <span>Free Entry Point Savings:</span>
+                      <span>-${countryData.savings.toFixed(2)}</span>
+                    </p>
+                  )}
+                  <p className="flex justify-between font-medium">
+                    <span>Subtotal:</span>
+                    <span>${countryData.total.toFixed(2)}</span>
+                  </p>
+                </div>
+              ))}
               <div className="border-t border-white/10 mt-4 pt-4">
-                <p className="flex justify-between font-semibold">
+                <p className="flex justify-between font-semibold text-lg">
                   <span>Total Monthly Cost:</span>
                   <span>${costs.total.toFixed(2)}</span>
                 </p>
+                {freeEntryPoint && (
+                  <p className="flex justify-between text-green-400 font-medium">
+                    <span>Total Savings:</span>
+                    <span>-${costs.totalSavings.toFixed(2)}</span>
+                  </p>
+                )}
               </div>
             </div>
           </Card>
