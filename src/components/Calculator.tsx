@@ -23,6 +23,7 @@ const Calculator = () => {
   const [authenticationPercentage, setAuthenticationPercentage] = useState(25);
   const [servicePercentage, setServicePercentage] = useState(20);
   const [freeEntryPoint, setFreeEntryPoint] = useState(false);
+  const [isMonthlyVolume, setIsMonthlyVolume] = useState(false);
 
   const updatePercentage = (type: 'marketing' | 'utility' | 'authentication' | 'service', newValue: number) => {
     const getOtherPercentages = (excludeType: string) => {
@@ -58,7 +59,7 @@ const Calculator = () => {
 
   const calculateMonthlyCost = () => {
     const costs = selectedCountries.map(({ country, messagesPerDay }) => {
-      const monthlyMessages = messagesPerDay * 30;
+      const monthlyMessages = isMonthlyVolume ? messagesPerDay : (messagesPerDay * 30);
       
       const marketingMessages = (monthlyMessages * marketingPercentage) / 100;
       const utilityMessages = (monthlyMessages * utilityPercentage) / 100;
@@ -114,7 +115,8 @@ const Calculator = () => {
   };
 
   const costs = calculateMonthlyCost();
-  const totalDailyMessages = selectedCountries.reduce((acc, curr) => acc + curr.messagesPerDay, 0);
+  const totalMessages = selectedCountries.reduce((acc, curr) => acc + curr.messagesPerDay, 0);
+  const displayedTotalMessages = isMonthlyVolume ? totalMessages : (totalMessages * 30);
 
   return (
     <div className="min-h-screen p-8">
@@ -148,7 +150,19 @@ const Calculator = () => {
             />
 
             <div className="space-y-4">
-              <label className="block text-sm font-medium">Messages per Day (Per Country)</label>
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium">Messages Volume</label>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-muted-foreground">Daily</span>
+                  <Switch
+                    checked={isMonthlyVolume}
+                    onCheckedChange={setIsMonthlyVolume}
+                    id="volume-type"
+                  />
+                  <span className="text-sm text-muted-foreground">Monthly</span>
+                </div>
+              </div>
+
               {selectedCountries.map(({ country, messagesPerDay }) => (
                 <div key={country.market} className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -156,21 +170,21 @@ const Calculator = () => {
                       {countryFlags[country.market] || "🌐"} {country.market}
                     </span>
                     <span className="text-sm text-muted-foreground">
-                      {messagesPerDay.toLocaleString()} messages
+                      {messagesPerDay.toLocaleString()} messages {isMonthlyVolume ? 'per month' : 'per day'}
                     </span>
                   </div>
                   <Slider
                     value={[messagesPerDay]}
                     onValueChange={(value) => updateCountryVolume(country.market, value[0])}
                     min={1}
-                    max={100000}
+                    max={isMonthlyVolume ? 3000000 : 100000}
                     step={1}
                     className="slider-track"
                   />
                 </div>
               ))}
               <p className="text-sm text-muted-foreground text-right">
-                Total: {totalDailyMessages.toLocaleString()} messages per day
+                Total: {displayedTotalMessages.toLocaleString()} messages per {isMonthlyVolume ? 'month' : 'day'}
               </p>
             </div>
 
