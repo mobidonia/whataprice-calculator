@@ -140,21 +140,21 @@ const Calculator = () => {
                       {countryFlags[country.market] || "🌐"} {country.market}
                     </span>
                     <span className="text-sm text-muted-foreground">
-                      {messagesPerDay} messages
+                      {messagesPerDay.toLocaleString()} messages
                     </span>
                   </div>
                   <Slider
                     value={[messagesPerDay]}
                     onValueChange={(value) => updateCountryVolume(country.market, value[0])}
                     min={1}
-                    max={1000}
+                    max={100000}
                     step={1}
                     className="slider-track"
                   />
                 </div>
               ))}
               <p className="text-sm text-muted-foreground text-right">
-                Total: {totalDailyMessages} messages per day
+                Total: {totalDailyMessages.toLocaleString()} messages per day
               </p>
             </div>
 
