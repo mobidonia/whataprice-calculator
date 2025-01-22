@@ -119,9 +119,14 @@ const Calculator = () => {
   return (
     <div className="min-h-screen p-8">
       <div className="max-w-6xl mx-auto space-y-8">
-        <h1 className="text-4xl font-bold text-center mb-8 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
-          WhatsApp Business API Pricing Calculator
-        </h1>
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
+            WhatsApp Business API Pricing Calculator
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Estimate your messaging costs across different regions and message types
+          </p>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <Card className="glass-card p-6 space-y-6">

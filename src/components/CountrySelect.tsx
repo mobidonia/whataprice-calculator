@@ -9,6 +9,12 @@ interface CountrySelectProps {
 }
 
 const CountrySelect = ({ selectedCountries, onValueChange, data }: CountrySelectProps) => {
+  // Ensure data exists before mapping
+  if (!Array.isArray(data)) {
+    console.error('Data prop is not an array:', data);
+    return null;
+  }
+
   return (
     <div className="space-y-4">
       <label className="block text-sm font-medium">Selected Countries</label>
