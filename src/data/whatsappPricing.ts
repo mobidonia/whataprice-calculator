@@ -4,6 +4,7 @@ export interface PricingData {
   marketing: number;
   utility: number;
   authentication: number;
+  service: number;
   authenticationInternational?: number;
 }
 
@@ -13,15 +14,16 @@ export const pricingData: PricingData[] = [
     currency: "$US",
     marketing: 0.0618,
     utility: 0.0340,
-    authentication: 0.0367
+    authentication: 0.0367,
+    service: 0
   },
-  // ... Add all other countries from the data
   {
     market: "Brazil",
     currency: "$US",
     marketing: 0.0625,
     utility: 0.0080,
-    authentication: 0.0315
+    authentication: 0.0315,
+    service: 0
   },
   {
     market: "India",
@@ -29,6 +31,7 @@ export const pricingData: PricingData[] = [
     marketing: 0.0107,
     utility: 0.0014,
     authentication: 0.0014,
+    service: 0,
     authenticationInternational: 0.0280
   },
   {
@@ -36,6 +39,7 @@ export const pricingData: PricingData[] = [
     currency: "$US",
     marketing: 0.0250,
     utility: 0.0040,
-    authentication: 0.0135
+    authentication: 0.0135,
+    service: 0
   }
 ];

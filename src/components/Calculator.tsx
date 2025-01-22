@@ -8,25 +8,29 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recha
 const Calculator = () => {
   const [selectedCountry, setSelectedCountry] = useState(pricingData[0]);
   const [messagesPerDay, setMessagesPerDay] = useState(100);
-  const [marketingPercentage, setMarketingPercentage] = useState(30);
-  const [utilityPercentage, setUtilityPercentage] = useState(40);
-  const [authenticationPercentage, setAuthenticationPercentage] = useState(30);
+  const [marketingPercentage, setMarketingPercentage] = useState(25);
+  const [utilityPercentage, setUtilityPercentage] = useState(30);
+  const [authenticationPercentage, setAuthenticationPercentage] = useState(25);
+  const [servicePercentage, setServicePercentage] = useState(20);
 
   const calculateMonthlyCost = () => {
     const monthlyMessages = messagesPerDay * 30;
     const marketingMessages = (monthlyMessages * marketingPercentage) / 100;
     const utilityMessages = (monthlyMessages * utilityPercentage) / 100;
     const authMessages = (monthlyMessages * authenticationPercentage) / 100;
+    const serviceMessages = (monthlyMessages * servicePercentage) / 100;
 
     const marketingCost = marketingMessages * selectedCountry.marketing;
     const utilityCost = utilityMessages * selectedCountry.utility;
     const authCost = authMessages * selectedCountry.authentication;
+    const serviceCost = 0; // Service messages are free
 
     return {
       marketing: marketingCost,
       utility: utilityCost,
       authentication: authCost,
-      total: marketingCost + utilityCost + authCost
+      service: serviceCost,
+      total: marketingCost + utilityCost + authCost + serviceCost
     };
   };
 
@@ -34,7 +38,8 @@ const Calculator = () => {
   const pieData = [
     { name: "Marketing", value: costs.marketing, color: "#8B5CF6" },
     { name: "Utility", value: costs.utility, color: "#EC4899" },
-    { name: "Authentication", value: costs.authentication, color: "#3B82F6" }
+    { name: "Authentication", value: costs.authentication, color: "#3B82F6" },
+    { name: "Service (Free)", value: 0, color: "#10B981" }
   ];
 
   return (
@@ -116,6 +121,17 @@ const Calculator = () => {
                     className="slider-track"
                   />
                 </div>
+                <div>
+                  <span className="text-sm">Service ({servicePercentage}%) - Free</span>
+                  <Slider
+                    value={[servicePercentage]}
+                    onValueChange={(value) => setServicePercentage(value[0])}
+                    min={0}
+                    max={100}
+                    step={1}
+                    className="slider-track"
+                  />
+                </div>
               </div>
             </div>
           </Card>
@@ -160,6 +176,10 @@ const Calculator = () => {
               <p className="flex justify-between">
                 <span>Authentication:</span>
                 <span>${costs.authentication.toFixed(2)}</span>
+              </p>
+              <p className="flex justify-between">
+                <span>Service:</span>
+                <span className="text-green-400">Free</span>
               </p>
               <div className="border-t border-white/10 mt-4 pt-4">
                 <p className="flex justify-between font-semibold">
