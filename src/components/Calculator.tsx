@@ -14,8 +14,9 @@ interface CountryVolume {
 }
 
 const Calculator = () => {
+  const defaultCountry = pricingData.find(p => p.market === "United States") || pricingData[0];
   const [selectedCountries, setSelectedCountries] = useState<CountryVolume[]>([
-    { country: pricingData[0], messagesPerDay: 100 }
+    { country: defaultCountry, messagesPerDay: 100 }
   ]);
   const [marketingPercentage, setMarketingPercentage] = useState(25);
   const [utilityPercentage, setUtilityPercentage] = useState(30);

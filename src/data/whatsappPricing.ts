@@ -10,6 +10,22 @@ export interface PricingData {
 
 export const pricingData: PricingData[] = [
   {
+    market: "United States",
+    currency: "$US",
+    marketing: 0.0250,
+    utility: 0.0040,
+    authentication: 0.0135,
+    service: 0
+  },
+  {
+    market: "Canada",
+    currency: "$US",
+    marketing: 0.0250,
+    utility: 0.0040,
+    authentication: 0.0135,
+    service: 0
+  },
+  {
     market: "Argentina",
     currency: "$US",
     marketing: 0.0618,
@@ -201,14 +217,6 @@ export const pricingData: PricingData[] = [
     marketing: 0.0529,
     utility: 0.0220,
     authentication: 0.0358,
-    service: 0
-  },
-  {
-    market: "North America",
-    currency: "$US",
-    marketing: 0.0250,
-    utility: 0.0040,
-    authentication: 0.0135,
     service: 0
   },
   {

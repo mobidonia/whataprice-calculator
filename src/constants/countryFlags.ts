@@ -30,5 +30,7 @@ export const countryFlags: { [key: string]: string } = {
   "Rest of Latin America": "🌎",
   "Rest of Middle East": "🌍",
   "Rest of Western Europe": "🌍",
-  "Other": "🌐"
+  "Other": "🌐",
+  "United States": "🇺🇸",
+  "Canada": "🇨🇦"
 };
