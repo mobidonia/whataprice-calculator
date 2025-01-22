@@ -49,10 +49,64 @@ const CostBreakdown = ({ costs, onRemoveCountry, showRemoveButton, freeEntryPoin
         <head>
           <title>WhatsApp Business API Monthly Cost Breakdown</title>
           <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .cost-item { margin: 10px 0; }
-            .total { margin-top: 20px; font-weight: bold; }
+            @page {
+              size: A4;
+              margin: 1cm;
+            }
+            body {
+              font-family: Arial, sans-serif;
+              font-size: 10pt;
+              line-height: 1.3;
+              margin: 0;
+              padding: 15px;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 15px;
+            }
+            .header h1 {
+              font-size: 16pt;
+              margin: 0 0 5px 0;
+            }
+            .header p {
+              margin: 0;
+              color: #666;
+            }
+            .content {
+              display: flex;
+              gap: 20px;
+            }
+            .cost-breakdown {
+              flex: 1;
+            }
+            .chat-messages {
+              flex: 1;
+              padding: 10px;
+              background: #f5f5f5;
+              border-radius: 5px;
+            }
+            .cost-item {
+              margin: 5px 0;
+              padding: 5px 0;
+              border-bottom: 1px solid #eee;
+            }
+            .cost-item h2 {
+              font-size: 12pt;
+              margin: 0 0 5px 0;
+            }
+            .cost-item p {
+              margin: 2px 0;
+            }
+            .total {
+              margin-top: 10px;
+              font-weight: bold;
+            }
+            @media print {
+              body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+            }
           </style>
         </head>
         <body>
@@ -60,24 +114,38 @@ const CostBreakdown = ({ costs, onRemoveCountry, showRemoveButton, freeEntryPoin
             <h1>WhatsApp Business API Monthly Cost Breakdown</h1>
             <p>Generated on ${new Date().toLocaleDateString()}</p>
           </div>
-          ${costs.byCountry.map(countryData => `
-            <div class="cost-item">
-              <h2>${countryData.country}</h2>
-              <p>Marketing: $${countryData.marketing.toFixed(2)}</p>
-              <p>Utility: $${countryData.utility.toFixed(2)}</p>
-              <p>Authentication: $${countryData.authentication.toFixed(2)}</p>
-              <p>Service: Free</p>
-              ${freeEntryPoint ? 
-                `<p style="color: green;">Free Entry Point Savings: -$${countryData.savings.toFixed(2)}</p>` 
-                : ''}
-              <p><strong>Subtotal: $${countryData.total.toFixed(2)}</strong></p>
+          <div class="content">
+            <div class="cost-breakdown">
+              ${costs.byCountry.map(countryData => `
+                <div class="cost-item">
+                  <h2>${countryData.country}</h2>
+                  <p>Marketing: $${countryData.marketing.toFixed(2)}</p>
+                  <p>Utility: $${countryData.utility.toFixed(2)}</p>
+                  <p>Authentication: $${countryData.authentication.toFixed(2)}</p>
+                  <p>Service: Free</p>
+                  ${freeEntryPoint ? 
+                    `<p style="color: green;">Free Entry Point Savings: -$${countryData.savings.toFixed(2)}</p>` 
+                    : ''}
+                  <p><strong>Subtotal: $${countryData.total.toFixed(2)}</strong></p>
+                </div>
+              `).join('')}
+              <div class="total">
+                <p>Total Monthly Cost: $${costs.total.toFixed(2)}</p>
+                ${freeEntryPoint ? 
+                  `<p style="color: green;">Total Savings: -$${costs.totalSavings.toFixed(2)}</p>`
+                  : ''}
+              </div>
             </div>
-          `).join('')}
-          <div class="total">
-            <p>Total Monthly Cost: $${costs.total.toFixed(2)}</p>
-            ${freeEntryPoint ? 
-              `<p style="color: green;">Total Savings: -$${costs.totalSavings.toFixed(2)}</p>`
-              : ''}
+            <div class="chat-messages">
+              <h2>Message Distribution</h2>
+              <p>Marketing Messages: ${costs.byCountry.reduce((acc, curr) => acc + curr.marketing, 0).toFixed(2)} per month</p>
+              <p>Utility Messages: ${costs.byCountry.reduce((acc, curr) => acc + curr.utility, 0).toFixed(2)} per month</p>
+              <p>Authentication Messages: ${costs.byCountry.reduce((acc, curr) => acc + curr.authentication, 0).toFixed(2)} per month</p>
+              <p>Service Messages: Free</p>
+              ${freeEntryPoint ? 
+                `<p style="color: green;">Total Free Entry Point Savings: $${costs.totalSavings.toFixed(2)}</p>` 
+                : ''}
+            </div>
           </div>
         </body>
       </html>
