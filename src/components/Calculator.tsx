@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import { pricingData } from "@/data/whatsappPricing";
+import { pricingData, PricingData } from "@/data/whatsappPricing";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import CountrySelect from "./CountrySelect";
 import { countryFlags } from "@/constants/countryFlags";
