@@ -74,7 +74,7 @@ const MessageTypeDistribution = ({
       
       {/* Ad Banner */}
       <div className="mt-8">
-        <h3 className="text-lg font-semibold mb-2 text-primary">
+        <h3 className="text-sm font-medium text-muted-foreground mb-2">
           Reduce Costs with Self-Hosted WhatsApp Marketing Solution
         </h3>
         <a 
