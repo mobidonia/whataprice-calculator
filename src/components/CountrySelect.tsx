@@ -2,42 +2,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PricingData } from "@/data/whatsappPricing";
 import { countryFlags } from "@/constants/countryFlags";
 
-// Map of country/region names to their corresponding flag emojis
-const countryFlags: { [key: string]: string } = {
-  "Argentina": "🇦🇷",
-  "Brazil": "🇧🇷",
-  "Chile": "🇨🇱",
-  "Colombia": "🇨🇴",
-  "Egypt": "🇪🇬",
-  "France": "🇫🇷",
-  "Germany": "🇩🇪",
-  "India": "🇮🇳",
-  "Indonesia": "🇮🇩",
-  "Israel": "🇮🇱",
-  "Italy": "🇮🇹",
-  "Malaysia": "🇲🇾",
-  "Mexico": "🇲🇽",
-  "Netherlands": "🇳🇱",
-  "Nigeria": "🇳🇬",
-  "Pakistan": "🇵🇰",
-  "Peru": "🇵🇪",
-  "Russia": "🇷🇺",
-  "Saudi Arabia": "🇸🇦",
-  "South Africa": "🇿🇦",
-  "Spain": "🇪🇸",
-  "Turkey": "🇹🇷",
-  "United Arab Emirates": "🇦🇪",
-  "United Kingdom": "🇬🇧",
-  "North America": "🌎",
-  "Rest of Africa": "🌍",
-  "Rest of Asia Pacific": "🌏",
-  "Rest of Central & Eastern Europe": "🌍",
-  "Rest of Latin America": "🌎",
-  "Rest of Middle East": "🌍",
-  "Rest of Western Europe": "🌍",
-  "Other": "🌐"
-};
-
 interface CountrySelectProps {
   selectedCountries: PricingData[];
   onValueChange: (value: string) => void;
