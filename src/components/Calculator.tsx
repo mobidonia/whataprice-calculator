@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { pricingData } from "@/data/whatsappPricing";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 
@@ -12,6 +13,7 @@ const Calculator = () => {
   const [utilityPercentage, setUtilityPercentage] = useState(30);
   const [authenticationPercentage, setAuthenticationPercentage] = useState(25);
   const [servicePercentage, setServicePercentage] = useState(20);
+  const [freeEntryPoint, setFreeEntryPoint] = useState(false);
 
   const calculateMonthlyCost = () => {
     const monthlyMessages = messagesPerDay * 30;
@@ -20,9 +22,12 @@ const Calculator = () => {
     const authMessages = (monthlyMessages * authenticationPercentage) / 100;
     const serviceMessages = (monthlyMessages * servicePercentage) / 100;
 
-    const marketingCost = marketingMessages * selectedCountry.marketing;
-    const utilityCost = utilityMessages * selectedCountry.utility;
-    const authCost = authMessages * selectedCountry.authentication;
+    // If free entry point is enabled, we assume 20% of conversations are free
+    const freeEntryPointDiscount = freeEntryPoint ? 0.2 : 0;
+    
+    const marketingCost = marketingMessages * selectedCountry.marketing * (1 - freeEntryPointDiscount);
+    const utilityCost = utilityMessages * selectedCountry.utility * (1 - freeEntryPointDiscount);
+    const authCost = authMessages * selectedCountry.authentication * (1 - freeEntryPointDiscount);
     const serviceCost = 0; // Service messages are free
 
     return {
@@ -30,7 +35,10 @@ const Calculator = () => {
       utility: utilityCost,
       authentication: authCost,
       service: serviceCost,
-      total: marketingCost + utilityCost + authCost + serviceCost
+      total: marketingCost + utilityCost + authCost + serviceCost,
+      savings: freeEntryPointDiscount * (marketingMessages * selectedCountry.marketing + 
+              utilityMessages * selectedCountry.utility + 
+              authMessages * selectedCountry.authentication)
     };
   };
 
@@ -83,6 +91,17 @@ const Calculator = () => {
                 className="slider-track"
               />
               <p className="text-sm text-muted-foreground text-right">{messagesPerDay} messages</p>
+            </div>
+
+            <div className="flex items-center space-x-2 py-4">
+              <Switch
+                checked={freeEntryPoint}
+                onCheckedChange={setFreeEntryPoint}
+                id="free-entry-point"
+              />
+              <label htmlFor="free-entry-point" className="text-sm font-medium">
+                Include Free Entry Point Conversations
+              </label>
             </div>
 
             <div className="space-y-4">
@@ -181,6 +200,12 @@ const Calculator = () => {
                 <span>Service:</span>
                 <span className="text-green-400">Free</span>
               </p>
+              {freeEntryPoint && (
+                <p className="flex justify-between text-green-400">
+                  <span>Free Entry Point Savings:</span>
+                  <span>-${costs.savings.toFixed(2)}</span>
+                </p>
+              )}
               <div className="border-t border-white/10 mt-4 pt-4">
                 <p className="flex justify-between font-semibold">
                   <span>Total Monthly Cost:</span>
